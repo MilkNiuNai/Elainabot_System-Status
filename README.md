@@ -155,7 +155,6 @@ plugins/系统状态/
 
 ## 🙏 致谢
 
-- 图标与设计灵感来自 ElainaBot 社区。
 - 进度条绘制依赖 Python `Pillow` 库。
 
 ---
