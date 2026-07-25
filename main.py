@@ -10,7 +10,7 @@ __plugin_meta__ = {
     'name': '系统监控',
     'author': '酸甜牛奶',
     'description': '系统状态监控、查看系统、cpu、内存、磁盘',
-    'version': '2.4.0',
+    'version': '1.1.0',
     'github': 'https://github.com/MilkNiuNai/Elainabot_System-Status',
     'license': 'MIT',
 }
