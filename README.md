@@ -39,6 +39,7 @@ pip install psutil Pillow aiohttp
 
 ## ⚙️ 配置文件
 已经有图床上传模式了
+
 配置文件位于 `data/config.yaml`，首次运行自动生成，内容如下：
 
 ```yaml
