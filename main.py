@@ -360,39 +360,35 @@ async def system_status(event, match):
     base_url = _config['base_url']
     image_url = f"{base_url}/api/ext/status/status.png?t={timestamp}"
 
-    # 图床上传
+    # ==================== 修改开始 ====================
+    # 使用图床模块统一上传方法 upload_any
     hosting = _get_hosting()
     if hosting:
         img_bytes = await loop.run_in_executor(None, _read_bytes, IMAGE_PATH)
         log.info("📤 使用图床模块上传...")
-        upload_chain = [
-            (hosting.upload_nature, 'Nature', hosting.is_nature_available),
-            (hosting.upload_bilibili, 'B站', hosting.is_bilibili_available),
-            (hosting.upload_chatglm, 'ChatGLM', hosting.is_chatglm_available),
-            (hosting.upload_ukaka, 'Ukaka', hosting.is_ukaka_available),
-            (hosting.upload_xingye, '星野', hosting.is_xingye_available),
-        ]
-        uploaded = False
-        for func, name, check in upload_chain:
-            if not check():
-                continue
-            log.info(f"  尝试 {name}...")
-            try:
-                res = await func(img_bytes)
-                if isinstance(res, str) and res.startswith('http'):
-                    image_url = res
-                    log.info(f"✅ {name} 上传成功: {image_url}")
-                    uploaded = True
-                    break
+        try:
+            # 调用 upload_any，让图床模块自动选择可用图床
+            res = await hosting.upload_any(img_bytes)
+            # 处理返回值：可能是字符串 URL，或元组 (bool, url/msg)，或字典
+            if isinstance(res, str) and res.startswith('http'):
+                image_url = res
+                log.info(f"✅ 图床上传成功: {image_url}")
+            elif isinstance(res, tuple) and len(res) == 2:
+                if res[0] is True and isinstance(res[1], str) and res[1].startswith('http'):
+                    image_url = res[1]
+                    log.info(f"✅ 图床上传成功: {image_url}")
                 else:
-                    reason = res[1] if isinstance(res, tuple) else '未知'
-                    log.warning(f"  {name} 失败: {reason}")
-            except Exception as e:
-                log.error(f"  {name} 异常: {e}")
-        if not uploaded:
-            log.warning("所有已启用图床均上传失败，使用本地图片链接")
+                    log.warning(f"图床上传返回失败: {res[1]}")
+            elif isinstance(res, dict) and res.get('file_url'):
+                image_url = res['file_url']
+                log.info(f"✅ 图床上传成功: {image_url}")
+            else:
+                log.warning(f"图床上传返回未知格式: {res}")
+        except Exception as e:
+            log.error(f"图床上传异常: {e}")
     else:
         log.warning("图床模块不可用，使用本地图片链接")
+    # ==================== 修改结束 ====================
 
     md = f"![img #{img_w}px #{img_h}px]({image_url})"
     await event.reply(md, buttons=[[{'text': '🔄 刷新状态', 'data': '系统状态', 'enter': True}]])
