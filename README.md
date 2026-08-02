@@ -54,7 +54,7 @@ use_image: true   # true为图片模式|false为文本模式
 #    - false : 不使用背景图，纯色背景
 use_background: false 
 ```
-
+已经有图床上传模式了
 ### 配置项说明
 
 | 字段 | 类型 | 默认值 | 说明 |
